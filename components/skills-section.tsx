@@ -200,7 +200,6 @@ export function SkillsSection() {
             />
           ))}
         </div>
-        </div>
 
         {/* Soft Skills Section */}
         <div className="mt-16">
