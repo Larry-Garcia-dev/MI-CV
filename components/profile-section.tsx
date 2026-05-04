@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/language-context";
 import { useState, useEffect, useRef } from "react";
-import { User, Terminal } from "lucide-react";
+import { User, Terminal, Calendar, Code2, Brain, Zap } from "lucide-react";
 
 export function ProfileSection() {
   const { t } = useLanguage();
@@ -95,27 +95,30 @@ export function ProfileSection() {
             {/* Stats */}
             <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Years Exp", value: "3+", icon: "📅" },
-                { label: "Projects", value: "50+", icon: "💻" },
-                { label: "AI Models", value: "10+", icon: "🤖" },
-                { label: "Automations", value: "100+", icon: "⚡" },
-              ].map((stat, index) => (
-                <div
-                  key={stat.label}
-                  className="glass rounded-lg p-4 text-center hover:border-primary/50 border border-transparent transition-all hover-lift group"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <div className="text-2xl mb-2 group-hover:scale-125 transition-transform">
-                    {stat.icon}
+                { label: "Years Exp", value: "3+", icon: Calendar },
+                { label: "Projects", value: "50+", icon: Code2 },
+                { label: "AI Models", value: "10+", icon: Brain },
+                { label: "Automations", value: "100+", icon: Zap },
+              ].map((stat, index) => {
+                const IconComponent = stat.icon;
+                return (
+                  <div
+                    key={stat.label}
+                    className="glass rounded-lg p-4 text-center hover:border-primary/50 border border-transparent transition-all hover-lift group"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex justify-center mb-2">
+                      <IconComponent className="w-7 h-7 text-accent group-hover:text-primary group-hover:scale-125 transition-all duration-300" />
+                    </div>
+                    <div className="font-mono text-2xl font-bold text-primary group-hover:neon-text transition-all">
+                      {stat.value}
+                    </div>
+                    <div className="font-mono text-xs text-muted-foreground">
+                      {stat.label}
+                    </div>
                   </div>
-                  <div className="font-mono text-2xl font-bold text-primary group-hover:neon-text transition-all">
-                    {stat.value}
-                  </div>
-                  <div className="font-mono text-xs text-muted-foreground">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* New line prompt */}
