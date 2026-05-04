@@ -50,14 +50,13 @@ export function MiniGame() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [combo, setCombo] = useState(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const gameLoopRef = useRef<number | null>(null);
+  const gameLoopRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const spawnerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastUpdateRef = useRef<number>(0);
 
   const cleanup = useCallback(() => {
     if (gameLoopRef.current) {
-      cancelAnimationFrame(gameLoopRef.current);
+      clearInterval(gameLoopRef.current);
       gameLoopRef.current = null;
     }
     if (timerRef.current) {
@@ -85,7 +84,6 @@ export function MiniGame() {
     setFallingCodes([]);
     setTimeLeft(30);
     setCombo(0);
-    lastUpdateRef.current = performance.now();
   }, [cleanup]);
 
   const catchCode = useCallback((id: number) => {
@@ -131,15 +129,12 @@ export function MiniGame() {
       setFallingCodes((prev) => [...prev.slice(-15), newCode]);
     }, 900);
 
-    // Animation loop
-    const gameLoop = (timestamp: number) => {
-      const deltaTime = timestamp - lastUpdateRef.current;
-      lastUpdateRef.current = timestamp;
-
+    // Animation loop using setInterval for consistent timing
+    const gameLoop = () => {
       setFallingCodes((prev) => {
         const updated = prev.map((code) => ({
           ...code,
-          y: code.y + code.speed * (deltaTime / 16),
+          y: code.y + code.speed * 1.2,
         }));
 
         const remaining = updated.filter((code) => {
@@ -152,11 +147,10 @@ export function MiniGame() {
 
         return remaining;
       });
-
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
 
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
+    const animationInterval = setInterval(gameLoop, 50);
+    gameLoopRef.current = animationInterval as unknown as number;
 
     return cleanup;
   }, [isPlaying, gameOver, cleanup, endGame, score]);
