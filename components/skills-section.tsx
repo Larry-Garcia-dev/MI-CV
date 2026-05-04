@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/language-context";
 import { useState } from "react";
-import { Brain, Code, Database, Layers, Wrench, Users, MessageCircle, Shuffle, Lightbulb, Clock, GraduationCap, Heart } from "lucide-react";
+import { Brain, Code, Database, Layers, Wrench, Users, MessageCircle, Shuffle, Lightbulb, Clock, GraduationCap, Heart, Monitor } from "lucide-react";
 
 interface SkillBarProps {
   name: string;
@@ -173,6 +173,16 @@ export function SkillsSection() {
         { name: "REST API", level: 90 },
         { name: "SSH/SSL/FTP", level: 80 },
         { name: "SendPulse", level: 75 },
+      ],
+    },
+    {
+      icon: <Monitor className="w-6 h-6" />,
+      title: t("systems"),
+      skills: [
+        { name: "Linux (Ubuntu/Debian)", level: 85 },
+        { name: "Windows Server", level: 80 },
+        { name: "Docker", level: 75 },
+        { name: "Terminal/Bash", level: 88 },
       ],
     },
   ];
