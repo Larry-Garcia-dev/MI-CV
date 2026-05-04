@@ -26,18 +26,18 @@ export function DownloadCVButton() {
       let yPosition = margin;
 
       // Colors
-      const primaryColor: [number, number, number] = [0, 255, 255]; // Cyan
-      const accentColor: [number, number, number] = [255, 0, 128]; // Pink
-      const textColor: [number, number, number] = [30, 30, 35];
-      const mutedColor: [number, number, number] = [100, 100, 110];
-      const bgColor: [number, number, number] = [245, 245, 250];
+      const primaryColor: [number, number, number] = [0, 0, 0]; // Black for titles
+      const accentColor: [number, number, number] = [50, 50, 50]; // Dark gray for accents
+      const textColor: [number, number, number] = [0, 0, 0]; // Black for text
+      const mutedColor: [number, number, number] = [80, 80, 80]; // Gray for secondary text
+      const bgColor: [number, number, number] = [255, 255, 255]; // White background
 
       // Background
       pdf.setFillColor(...bgColor);
       pdf.rect(0, 0, pageWidth, pageHeight, "F");
 
-      // Header gradient line
-      pdf.setFillColor(...primaryColor);
+      // Header line
+      pdf.setFillColor(0, 0, 0);
       pdf.rect(0, 0, pageWidth, 3, "F");
 
       // Profile photo
