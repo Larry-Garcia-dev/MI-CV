@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/language-context";
 import { useState } from "react";
-import { Brain, Code, Database, Layers, Wrench } from "lucide-react";
+import { Brain, Code, Database, Layers, Wrench, Users, MessageCircle, Shuffle, Lightbulb, Clock, GraduationCap, Heart } from "lucide-react";
 
 interface SkillBarProps {
   name: string;
@@ -199,6 +199,58 @@ export function SkillsSection() {
               index={index}
             />
           ))}
+        </div>
+        </div>
+
+        {/* Soft Skills Section */}
+        <div className="mt-16">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl md:text-3xl font-mono font-bold text-accent mb-4 flex items-center justify-center gap-3">
+              <Heart className="w-7 h-7" />
+              {t("softSkills")}
+            </h3>
+            <div className="w-24 h-0.5 mx-auto bg-gradient-to-r from-accent to-primary rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Users, titleKey: "teamwork", descKey: "teamworkDesc" },
+              { icon: MessageCircle, titleKey: "communication", descKey: "communicationDesc" },
+              { icon: Shuffle, titleKey: "adaptability", descKey: "adaptabilityDesc" },
+              { icon: Lightbulb, titleKey: "problemSolving", descKey: "problemSolvingDesc" },
+              { icon: Clock, titleKey: "timeManagement", descKey: "timeManagementDesc" },
+              { icon: GraduationCap, titleKey: "continuousLearning", descKey: "continuousLearningDesc" },
+            ].map((skill, index) => {
+              const IconComponent = skill.icon;
+              return (
+                <div
+                  key={skill.titleKey}
+                  className="glass rounded-xl p-6 border border-border hover:border-accent/50 transition-all duration-300 hover-lift group relative overflow-hidden"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Glow effect on hover */}
+                  <div className="absolute -top-16 -right-16 w-32 h-32 rounded-full blur-3xl transition-opacity duration-500 opacity-0 group-hover:opacity-20 bg-accent" />
+                  
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-accent/10 text-accent transition-all duration-300 group-hover:scale-110 group-hover:bg-accent/20 shrink-0">
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-mono font-semibold text-foreground mb-2 group-hover:text-accent transition-colors">
+                        {t(skill.titleKey)}
+                      </h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {t(skill.descKey)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bottom accent line */}
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-accent/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
