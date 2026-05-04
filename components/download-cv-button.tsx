@@ -40,7 +40,12 @@ export function DownloadCVButton() {
       pdf.setFillColor(0, 0, 0);
       pdf.rect(0, 0, pageWidth, 3, "F");
 
-      // Profile photo
+      // Header section with photo on left and text on right
+      const imgSize = 40;
+      const headerStartY = yPosition + 5;
+      const textStartX = margin + imgSize + 10;
+      
+      // Profile photo on the left
       try {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -58,40 +63,40 @@ export function DownloadCVButton() {
         if (ctx) {
           ctx.drawImage(img, 0, 0);
           const imgData = canvas.toDataURL("image/jpeg", 0.8);
-          const imgSize = 35;
           pdf.addImage(
             imgData,
             "JPEG",
-            pageWidth / 2 - imgSize / 2,
-            yPosition + 5,
+            margin,
+            headerStartY,
             imgSize,
             imgSize
           );
-          yPosition += imgSize + 10;
         }
       } catch {
-        yPosition += 5;
+        // If image fails, continue without it
       }
 
-      // Name
+      // Name on the right of photo
+      let textY = headerStartY + 8;
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(24);
+      pdf.setFontSize(22);
       pdf.setTextColor(...primaryColor);
-      pdf.text(t("name"), pageWidth / 2, yPosition, { align: "center" });
-      yPosition += 10;
+      pdf.text(t("name"), textStartX, textY);
+      textY += 10;
 
       // Role
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(12);
       pdf.setTextColor(...textColor);
-      pdf.text(t("role"), pageWidth / 2, yPosition, { align: "center" });
-      yPosition += 6;
+      pdf.text(t("role"), textStartX, textY);
+      textY += 7;
 
       // Subtitle
       pdf.setFontSize(10);
       pdf.setTextColor(...accentColor);
-      pdf.text(t("subtitle"), pageWidth / 2, yPosition, { align: "center" });
-      yPosition += 12;
+      pdf.text(t("subtitle"), textStartX, textY);
+      
+      yPosition = headerStartY + imgSize + 8;
 
       // Divider
       pdf.setDrawColor(...primaryColor);
