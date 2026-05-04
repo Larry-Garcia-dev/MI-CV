@@ -96,19 +96,10 @@ export function HeroSection() {
               alt="Larry Garcia - Software Developer"
               fill
               className={`object-cover transition-all duration-500 ${
-                imageHover ? 'scale-110 brightness-110' : 'scale-100'
+                imageHover ? 'scale-110' : 'scale-100'
               }`}
               priority
             />
-            
-            {/* Holographic overlay on hover */}
-            <div className={`absolute inset-0 transition-opacity duration-300 ${
-              imageHover ? 'opacity-30' : 'opacity-0'
-            }`} style={{
-              background: 'linear-gradient(45deg, transparent 40%, var(--neon-cyan) 45%, var(--neon-pink) 55%, transparent 60%)',
-              backgroundSize: '200% 200%',
-              animation: imageHover ? 'border-flow 2s ease infinite' : 'none'
-            }} />
           </div>
           
           {/* Glow effect */}
