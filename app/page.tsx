@@ -12,6 +12,7 @@ import { ContactSection } from "@/components/contact-section";
 import { ProfileSection } from "@/components/profile-section";
 import { FloatingNav } from "@/components/floating-nav";
 import { LoadingScreen } from "@/components/loading-screen";
+import { DownloadCVButton } from "@/components/download-cv-button";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +34,9 @@ export default function Home() {
 
         {/* Floating navigation */}
         <FloatingNav />
+
+        {/* Download CV Button */}
+        <DownloadCVButton />
 
         {/* Hero Section */}
         <div id="hero">
