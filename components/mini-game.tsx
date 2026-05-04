@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/lib/language-context";
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Gamepad2, Play, RotateCcw, Zap } from "lucide-react";
+import { Gamepad2, Play, RotateCcw, Zap, Trophy } from "lucide-react";
 
 interface FallingCode {
   id: number;
@@ -11,6 +11,34 @@ interface FallingCode {
   code: string;
   speed: number;
 }
+
+const CODE_SNIPPETS = [
+  "const",
+  "function",
+  "return",
+  "async",
+  "await",
+  "import",
+  "export",
+  "class",
+  "interface",
+  "type",
+  "let",
+  "var",
+  "if",
+  "else",
+  "for",
+  "while",
+  "try",
+  "catch",
+  "throw",
+  "new",
+  "{}",
+  "[]",
+  "=>",
+  "()",
+  "===",
+];
 
 export function MiniGame() {
   const { t } = useLanguage();
@@ -22,117 +50,121 @@ export function MiniGame() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [combo, setCombo] = useState(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number>(0);
+  const gameLoopRef = useRef<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const spawnerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
-  const codeSnippets = [
-    "const",
-    "function",
-    "return",
-    "async",
-    "await",
-    "import",
-    "export",
-    "class",
-    "interface",
-    "type",
-    "let",
-    "var",
-    "if",
-    "else",
-    "for",
-    "while",
-    "try",
-    "catch",
-    "throw",
-    "new",
-    "{}",
-    "[]",
-    "=>",
-    "()",
-    "===",
-    "!==",
-    "&&",
-    "||",
-    "++",
-    "--",
-  ];
+  const cleanup = useCallback(() => {
+    if (gameLoopRef.current) {
+      cancelAnimationFrame(gameLoopRef.current);
+      gameLoopRef.current = null;
+    }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (spawnerRef.current) {
+      clearInterval(spawnerRef.current);
+      spawnerRef.current = null;
+    }
+  }, []);
+
+  const endGame = useCallback((finalScore: number) => {
+    cleanup();
+    setIsPlaying(false);
+    setGameOver(true);
+    setHighScore((prev) => Math.max(prev, finalScore));
+  }, [cleanup]);
 
   const startGame = useCallback(() => {
+    cleanup();
     setIsPlaying(true);
     setScore(0);
     setGameOver(false);
     setFallingCodes([]);
     setTimeLeft(30);
     setCombo(0);
+    lastUpdateRef.current = performance.now();
+  }, [cleanup]);
+
+  const catchCode = useCallback((id: number) => {
+    setFallingCodes((prev) => prev.filter((code) => code.id !== id));
+    setCombo((prev) => {
+      const newCombo = prev + 1;
+      const comboBonus = Math.floor(newCombo / 3) * 5;
+      setScore((s) => s + 10 + comboBonus);
+      return newCombo;
+    });
   }, []);
 
-  const catchCode = useCallback(
-    (id: number) => {
-      setFallingCodes((prev) => prev.filter((code) => code.id !== id));
-      const comboBonus = Math.floor(combo / 3);
-      setScore((prev) => prev + 10 + comboBonus * 5);
-      setCombo((prev) => prev + 1);
-    },
-    [combo]
-  );
-
-  // Game loop
+  // Game loop effect
   useEffect(() => {
     if (!isPlaying || gameOver) return;
 
+    let currentScore = score;
+
     // Timer
-    const timer = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          setIsPlaying(false);
-          setGameOver(true);
-          setHighScore((high) => Math.max(high, score));
+          setScore((s) => {
+            currentScore = s;
+            return s;
+          });
+          setTimeout(() => endGame(currentScore), 0);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
 
-    // Spawn new codes
-    const spawner = setInterval(() => {
+    // Spawner
+    spawnerRef.current = setInterval(() => {
       const newCode: FallingCode = {
         id: Date.now() + Math.random(),
-        x: Math.random() * 80 + 10,
+        x: Math.random() * 75 + 10,
         y: 0,
-        code: codeSnippets[Math.floor(Math.random() * codeSnippets.length)],
-        speed: Math.random() * 2 + 1,
+        code: CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)],
+        speed: Math.random() * 0.8 + 0.4,
       };
-      setFallingCodes((prev) => [...prev, newCode]);
-    }, 800);
+      setFallingCodes((prev) => [...prev.slice(-15), newCode]);
+    }, 900);
 
-    // Move codes down
-    const gameLoop = () => {
+    // Animation loop
+    const gameLoop = (timestamp: number) => {
+      const deltaTime = timestamp - lastUpdateRef.current;
+      lastUpdateRef.current = timestamp;
+
       setFallingCodes((prev) => {
-        const updated = prev
-          .map((code) => ({
-            ...code,
-            y: code.y + code.speed,
-          }))
-          .filter((code) => {
-            if (code.y > 100) {
-              setCombo(0); // Reset combo when code is missed
-              return false;
-            }
-            return true;
-          });
-        return updated;
+        const updated = prev.map((code) => ({
+          ...code,
+          y: code.y + code.speed * (deltaTime / 16),
+        }));
+
+        const remaining = updated.filter((code) => {
+          if (code.y > 95) {
+            setCombo(0);
+            return false;
+          }
+          return true;
+        });
+
+        return remaining;
       });
-      animationRef.current = requestAnimationFrame(gameLoop);
+
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
     };
 
-    animationRef.current = requestAnimationFrame(gameLoop);
+    gameLoopRef.current = requestAnimationFrame(gameLoop);
 
-    return () => {
-      clearInterval(timer);
-      clearInterval(spawner);
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [isPlaying, gameOver, score, codeSnippets]);
+    return cleanup;
+  }, [isPlaying, gameOver, cleanup, endGame, score]);
+
+  // Update currentScore tracker
+  useEffect(() => {
+    // This effect just tracks the score for the endGame callback
+  }, [score]);
 
   return (
     <section className="py-20 px-4">
@@ -153,14 +185,14 @@ export function MiniGame() {
         {/* Game area */}
         <div
           ref={gameAreaRef}
-          className="relative glass rounded-2xl border border-accent/30 overflow-hidden"
+          className="relative glass rounded-2xl border border-accent/30 overflow-hidden select-none"
           style={{ height: "400px" }}
         >
           {/* Scanlines effect */}
           <div className="scanlines absolute inset-0 pointer-events-none z-10" />
 
           {/* Score display */}
-          <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20">
+          <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-20 pointer-events-none">
             <div className="glass px-4 py-2 rounded-lg">
               <span className="font-mono text-sm text-muted-foreground">
                 {t("score")}:{" "}
@@ -178,21 +210,21 @@ export function MiniGame() {
               </span>
             </div>
             <div className="glass px-4 py-2 rounded-lg">
-              <span className="font-mono text-lg text-accent">
+              <span className={`font-mono text-lg ${timeLeft <= 10 ? 'text-red-400' : 'text-accent'}`}>
                 {timeLeft}s
               </span>
             </div>
           </div>
 
           {/* Falling codes */}
-          {fallingCodes.map((code) => (
+          {isPlaying && fallingCodes.map((code) => (
             <button
               key={code.id}
               onClick={() => catchCode(code.id)}
-              className="absolute px-3 py-1 glass rounded-lg border border-primary/50 
+              className="absolute px-3 py-1.5 glass rounded-lg border border-primary/50 
                          font-mono text-sm text-primary cursor-pointer
                          hover:scale-125 hover:bg-primary hover:text-primary-foreground
-                         transition-all duration-100 active:scale-90"
+                         transition-all duration-100 active:scale-90 z-20"
               style={{
                 left: `${code.x}%`,
                 top: `${code.y}%`,
@@ -208,13 +240,14 @@ export function MiniGame() {
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-30">
               {gameOver ? (
                 <>
+                  <Trophy className="w-16 h-16 text-yellow-400 mb-4 animate-float" />
                   <h3 className="text-2xl font-mono font-bold text-accent mb-2 animate-glitch">
                     {t("gameOver")}
                   </h3>
                   <p className="font-mono text-muted-foreground mb-2">
-                    {t("score")}: {score}
+                    {t("score")}: <span className="text-primary">{score}</span>
                   </p>
-                  <p className="font-mono text-sm text-primary mb-6">
+                  <p className="font-mono text-sm text-yellow-400 mb-6">
                     High Score: {highScore}
                   </p>
                   <button
@@ -229,8 +262,11 @@ export function MiniGame() {
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-4 animate-float">🎮</div>
-                  <p className="font-mono text-muted-foreground mb-6 text-center px-4">
+                  <Gamepad2 className="w-16 h-16 text-primary mb-4 animate-float" />
+                  <h3 className="text-xl font-mono font-bold text-foreground mb-2">
+                    Catch The Code
+                  </h3>
+                  <p className="font-mono text-muted-foreground mb-6 text-center px-4 max-w-sm">
                     {t("catchTheCode")}
                   </p>
                   <button
