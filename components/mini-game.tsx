@@ -166,8 +166,8 @@ export function MiniGame() {
         {/* Section header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 mb-4">
-            <Gamepad2 className="w-8 h-8 text-accent animate-float" />
-            <h2 className="text-3xl md:text-4xl font-mono font-bold text-accent neon-text">
+            <Gamepad2 className="w-8 h-8 text-primary animate-float" />
+            <h2 className="text-3xl md:text-4xl font-mono font-bold text-primary" style={{ textShadow: '0 0 10px rgba(0, 255, 255, 0.8), 0 0 20px rgba(0, 255, 255, 0.5), 0 0 30px rgba(0, 255, 255, 0.3)' }}>
               {t("miniGame")}
             </h2>
           </div>
